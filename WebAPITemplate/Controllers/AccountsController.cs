@@ -154,14 +154,21 @@ namespace WebAPITemplate.Controllers
         {
             var user = _unitOfWork.UsersRepository.Get(x => x.Email == request.Id).FirstOrDefault(); ;
             if (user == null)
+            {
                 throw new InvalidOperationException();
+            }
+
+            if (request.Token != UserManager<Users>.ResetPasswordTokenPurpose)
+            {
+                return BadRequest("Token incorrect");
+            }
 
             if (request.Password != request.RePassword)
             {
                 return BadRequest(_localizer["InvalidPasswordsMatch"]);
             }
 
-            var resetPasswordResult = _unitOfWork.UsersRepository.ResetPassword(user, request.Token, request.Password);
+            var resetPasswordResult = _unitOfWork.UsersRepository.ResetPassword(user, request.Password);
             if (!resetPasswordResult)
             {
                 return BadRequest(_localizer["InvalidPasswordReset"]);
@@ -219,7 +226,14 @@ namespace WebAPITemplate.Controllers
                 return BadRequest(_localizer["InvalidLoginCredentials"]);
             }
 
-            return Ok(_localizer["LoginSuccessfully"]);
+            return Ok(new
+            {
+                user.Email,
+                user.UserName,
+                user.DocumentId,
+                request.Password,
+                Message = _localizer["LoginSuccessfully"]
+            });
         }
 
         [HttpPost]
@@ -227,6 +241,49 @@ namespace WebAPITemplate.Controllers
         public IActionResult Logout()
         {
             return Ok(_localizer["LogoutSuccessfully"]);
+        }
+
+        [HttpPost]
+        [Route("confirm/email")]
+        public IActionResult ConfirmEmail(string id, string token)
+        {
+            var user = _unitOfWork.UsersRepository.GetByID(id);
+            if (user == null)
+            {
+                return BadRequest(_localizer["InvalidLoginCredentials"]);
+            }
+
+            if (UserManager<Users>.ConfirmEmailTokenPurpose != token)
+            {
+                return BadRequest("Token incorrect");
+            }
+
+            try
+            {
+                user.EmailConfirmed = true;
+                _unitOfWork.UsersRepository.Update(user);
+                _unitOfWork.Save();
+            }
+            catch (SqlException sqlex)
+            {
+                return StatusCode(
+                    (int)HttpStatusCode.InternalServerError,
+                    new
+                    {
+                        Message = _localizer["DatabaseConnectionException"],
+                        Errors = sqlex.Message
+                    });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    Message = _localizer["InvalidUserCreation"],
+                    Errors = ex.Message
+                });
+            }
+
+            return Ok();
         }
     }
 }

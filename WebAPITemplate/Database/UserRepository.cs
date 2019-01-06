@@ -8,7 +8,7 @@ namespace WebAPITemplate.Database
     {
         public UsersRepository(DatabaseContext context) : base(context) { }
 
-        public bool ResetPassword(Users user, string token, string password)
+        public bool ResetPassword(Users user, string password)
         {
             if (password == null)
             {

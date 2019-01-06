@@ -9,5 +9,7 @@
         public const string TokenEmail = "m.silva.gambardelo@gmail.com";
         public const string TokenIssuer = "TemplateApp";
         public const string TokenAudience = "TemplateSite";
+        public const string DefaultLoginProvider = "System";
+        public const string DefaultTokenName = "SystemToken";
     }
 }
