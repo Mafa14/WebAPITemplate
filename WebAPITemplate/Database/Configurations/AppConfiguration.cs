@@ -21,35 +21,34 @@ namespace WebAPITemplate.Database.Configurations
 
         private AppConfiguration()
         {
-            var configurationBuilder = new ConfigurationBuilder();
-            var path = Path.Combine(Directory.GetCurrentDirectory(), "appsettings.json");
-            configurationBuilder.AddJsonFile(path, false);
-
-            var root = configurationBuilder.Build();
+            var root = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .Build();
             SqlDataConnection = root.GetConnectionString("DataConnection");
 
             var urlConfigurations = new UrlConfigurations
             {
-                MainURL = root.GetValue<string>("MainURL"),
-                SecureMainURL = root.GetValue<string>("SecureMainURL"),
-                RegistrationURL = root.GetValue<string>("RegistrationURL"),
-                SecureRegistrationURL = root.GetValue<string>("SecureRegistrationURL"),
-                ResetURL = root.GetValue<string>("ResetURL"),
-                SecureResetURL = root.GetValue<string>("SecureResetURL")
+                MainURL = root.GetValue<string>("UrlConfigurations:MainURL"),
+                SecureMainURL = root.GetValue<string>("UrlConfigurations:SecureMainURL"),
+                RegistrationURL = root.GetValue<string>("UrlConfigurations:RegistrationURL"),
+                SecureRegistrationURL = root.GetValue<string>("UrlConfigurations:SecureRegistrationURL"),
+                ResetURL = root.GetValue<string>("UrlConfigurations:ResetURL"),
+                SecureResetURL = root.GetValue<string>("UrlConfigurations:SecureResetURL")
             };
             UrlConfigurations = urlConfigurations;
 
             var emailConfigurations = new EmailConfigurations
             {
-                PrimaryDomain = root.GetValue<string>("PrimaryDomain"),
-                PrimaryPort = root.GetValue<int>("PrimaryPort"),
-                SecondayDomain = root.GetValue<string>("SecondayDomain"),
-                SecondaryPort = root.GetValue<int>("SecondaryPort"),
-                UsernameEmail = root.GetValue<string>("UsernameEmail"),
-                UsernamePassword = root.GetValue<string>("UsernamePassword"),
-                FromEmail = root.GetValue<string>("FromEmail"),
-                ToEmail = root.GetValue<string>("ToEmail"),
-                CcEmail = root.GetValue<string>("CcEmail")
+                PrimaryDomain = root.GetValue<string>("EmailConfigurations:PrimaryDomain"),
+                PrimaryPort = root.GetValue<int>("EmailConfigurations:PrimaryPort"),
+                SecondayDomain = root.GetValue<string>("EmailConfigurations:SecondayDomain"),
+                SecondaryPort = root.GetValue<int>("EmailConfigurations:SecondaryPort"),
+                UsernameEmail = root.GetValue<string>("EmailConfigurations:UsernameEmail"),
+                UsernamePassword = root.GetValue<string>("EmailConfigurations:UsernamePassword"),
+                FromEmail = root.GetValue<string>("EmailConfigurations:FromEmail"),
+                ToEmail = root.GetValue<string>("EmailConfigurations:ToEmail"),
+                CcEmail = root.GetValue<string>("EmailConfigurations:CcEmail")
             };
             EmailConfigurations = emailConfigurations;
         }

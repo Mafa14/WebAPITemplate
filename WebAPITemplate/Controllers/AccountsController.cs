@@ -9,6 +9,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using System.Web;
 using WebAPITemplate.Database;
 using WebAPITemplate.Database.Models;
 using WebAPITemplate.Helpers.Validators;
@@ -67,6 +68,11 @@ namespace WebAPITemplate.Controllers
                 return BadRequest(_localizer["InvalidPasswordsMatch"]);
             }
 
+            if (request.ConfirmationUrl == null)
+            {
+                return BadRequest("Un error ocurrio con los datos proporcionados del usuario.");
+            }
+
             if (errors.Any())
             {
                 return BadRequest(string.Join(Environment.NewLine, errors.Select(e => "- " + e).ToArray()));
@@ -107,15 +113,9 @@ namespace WebAPITemplate.Controllers
                 });
             }
 
-            var emailConfirmationToken = UserManager<Users>.ConfirmEmailTokenPurpose;
-            var tokenVerificationUrl = Url.Action(
-                "VerifyEmail", "Account",
-                new
-                {
-                    newUser.Id,
-                    token = emailConfirmationToken
-                },
-                Request.Scheme);
+            var tokenVerificationUrl = HttpUtility.UrlDecode(request.ConfirmationUrl)
+                .Replace("#Id", newUser.Id)
+                .Replace("#Token", UserManager<Users>.ConfirmEmailTokenPurpose);
             await _emailService.SendEmailAsync(request.Email, _localizer["EmailVerificationSubject"],
                 string.Format(_localizer["EmailVerificationMessage"], tokenVerificationUrl));
 
@@ -132,18 +132,17 @@ namespace WebAPITemplate.Controllers
                 return BadRequest(_localizer["ForgotPasswordCheckEmailMessage"]);
             }
 
-            var passwordResetToken = UserManager<Users>.ResetPasswordTokenPurpose;
-            var passwordResetUrl = Url.Action(
-                "ResetPassword", "Account",
-                new
-                {
-                    id = user.Id,
-                    token = passwordResetToken
-                },
-                Request.Scheme);
+            if (request.ConfirmationUrl == null)
+            {
+                return BadRequest("Un error ocurrio con los datos proporcionados.");
+            }
+
+            var tokenVerificationUrl = HttpUtility.UrlDecode(request.ConfirmationUrl)
+                .Replace("#Id", user.Id)
+                .Replace("#Token", UserManager<Users>.ResetPasswordTokenPurpose);
 
             await _emailService.SendEmailAsync(request.Email, _localizer["ForgotPasswordSubject"],
-                string.Format(_localizer["ForgotPasswordMessage"], passwordResetUrl));
+                string.Format(_localizer["ForgotPasswordMessage"], tokenVerificationUrl));
 
             return Ok(_localizer["ForgotPasswordCheckEmailMessage"]);
         }
@@ -216,10 +215,11 @@ namespace WebAPITemplate.Controllers
                 return BadRequest(_localizer["InvalidLoginCredentials"]);
             }
 
-            if (!user.EmailConfirmed)
-            {
-                return BadRequest(_localizer["EmailNotVerifiedMessage"]);
-            }
+            // TODO: REMOVE ON PRODUCTION
+            //if (!user.EmailConfirmed)
+            //{
+            //    return BadRequest(_localizer["EmailNotVerifiedMessage"]);
+            //}
 
             if (!Crypto.VerifyHashedPassword(user.PasswordHash, request.Password))
             {
@@ -256,6 +256,11 @@ namespace WebAPITemplate.Controllers
             if (UserManager<Users>.ConfirmEmailTokenPurpose != token)
             {
                 return BadRequest("Token incorrect");
+            }
+
+            if (user.EmailConfirmed)
+            {
+                return Ok();
             }
 
             try
