@@ -43,29 +43,29 @@ namespace WebAPITemplate.Controllers
 
             if (!BasicFieldsValidatior.IsDocumentIdLengthValid(request.DocumentId))
             {
-                errors.Add(string.Format(_localizer["InvalidDocumentIdLength"], BasicFieldsValidatior.DocumentMinLength));
+                errors.Add(string.Format(_localizer["InvalidDocumentIdLength"].Value, BasicFieldsValidatior.DocumentMinLength));
             }
 
             if (!BasicFieldsValidatior.IsStringValid(request.UserName))
             {
-                errors.Add(string.Format(_localizer["InvalidUserNameLength"], BasicFieldsValidatior.StandardStringMaxLength));
+                errors.Add(string.Format(_localizer["InvalidUserNameLength"].Value, BasicFieldsValidatior.StandardStringMaxLength));
             }
 
             if (!BasicFieldsValidatior.IsEmailValid(request.Email))
             {
-                errors.Add(_localizer["InvalidEmailFormat"]);
+                errors.Add(_localizer["InvalidEmailFormat"].Value);
             }
 
             if (!BasicFieldsValidatior.IsPasswordLengthValid(request.Password))
             {
-                errors.Add(string.Format(_localizer["InvalidPasswordLength"],
+                errors.Add(string.Format(_localizer["InvalidPasswordLength"].Value,
                     BasicFieldsValidatior.PasswordMinLength,
                     BasicFieldsValidatior.PasswordMaxLength));
             }
 
             if (request.Password != request.ConfirmPassword)
             {
-                return BadRequest(_localizer["InvalidPasswordsMatch"]);
+                return BadRequest(_localizer["InvalidPasswordsMatch"].Value);
             }
 
             if (request.ConfirmationUrl == null)
@@ -100,7 +100,7 @@ namespace WebAPITemplate.Controllers
                     (int)HttpStatusCode.InternalServerError,
                     new
                     {
-                        Message = _localizer["DatabaseConnectionException"],
+                        Message = _localizer["DatabaseConnectionException"].Value,
                         Errors = sqlex.Message
                     });
             }
@@ -108,7 +108,7 @@ namespace WebAPITemplate.Controllers
             {
                 return BadRequest(new
                 {
-                    Message = _localizer["InvalidUserCreation"],
+                    Message = _localizer["InvalidUserCreation"].Value,
                     Errors = ex.Message
                 });
             }
@@ -116,10 +116,10 @@ namespace WebAPITemplate.Controllers
             var tokenVerificationUrl = HttpUtility.UrlDecode(request.ConfirmationUrl)
                 .Replace("#Id", newUser.Id)
                 .Replace("#Token", UserManager<Users>.ConfirmEmailTokenPurpose);
-            await _emailService.SendEmailAsync(request.Email, _localizer["EmailVerificationSubject"],
-                string.Format(_localizer["EmailVerificationMessage"], tokenVerificationUrl));
+            await _emailService.SendEmailAsync(request.Email, _localizer["EmailVerificationSubject"].Value,
+                string.Format(_localizer["EmailVerificationMessage"].Value, tokenVerificationUrl));
 
-            return Ok(string.Format(_localizer["RegistrationConfirmationMessage"], request.Email));
+            return Ok(string.Format(_localizer["RegistrationConfirmationMessage"].Value, request.Email));
         }
 
         [HttpPost]
@@ -129,7 +129,7 @@ namespace WebAPITemplate.Controllers
             var user = _unitOfWork.UsersRepository.Get(x => x.Email == request.Email).FirstOrDefault();
             if (user == null)
             {
-                return BadRequest(_localizer["ForgotPasswordCheckEmailMessage"]);
+                return BadRequest(_localizer["ForgotPasswordCheckEmailMessage"].Value);
             }
 
             if (request.ConfirmationUrl == null)
@@ -141,17 +141,17 @@ namespace WebAPITemplate.Controllers
                 .Replace("#Id", user.Id)
                 .Replace("#Token", UserManager<Users>.ResetPasswordTokenPurpose);
 
-            await _emailService.SendEmailAsync(request.Email, _localizer["ForgotPasswordSubject"],
-                string.Format(_localizer["ForgotPasswordMessage"], tokenVerificationUrl));
+            await _emailService.SendEmailAsync(request.Email, _localizer["ForgotPasswordSubject"].Value,
+                string.Format(_localizer["ForgotPasswordMessage"].Value, tokenVerificationUrl));
 
-            return Ok(_localizer["ForgotPasswordCheckEmailMessage"]);
+            return Ok(_localizer["ForgotPasswordCheckEmailMessage"].Value);
         }
 
         [HttpPost]
         [Route("reset")]
         public async Task<IActionResult> ResetPassword(ResetPasswordRequest request)
         {
-            var user = _unitOfWork.UsersRepository.Get(x => x.Email == request.Id).FirstOrDefault(); ;
+            var user = _unitOfWork.UsersRepository.GetByID(request.Id);
             if (user == null)
             {
                 throw new InvalidOperationException();
@@ -162,15 +162,15 @@ namespace WebAPITemplate.Controllers
                 return BadRequest("Token incorrect");
             }
 
-            if (request.Password != request.RePassword)
+            if (request.Password != request.ConfirmPassword)
             {
-                return BadRequest(_localizer["InvalidPasswordsMatch"]);
+                return BadRequest(_localizer["InvalidPasswordsMatch"].Value);
             }
 
             var resetPasswordResult = _unitOfWork.UsersRepository.ResetPassword(user, request.Password);
             if (!resetPasswordResult)
             {
-                return BadRequest(_localizer["InvalidPasswordReset"]);
+                return BadRequest(_localizer["InvalidPasswordReset"].Value);
             }
 
             try
@@ -184,7 +184,7 @@ namespace WebAPITemplate.Controllers
                     (int)HttpStatusCode.InternalServerError,
                     new
                     {
-                        Message = _localizer["DatabaseConnectionException"],
+                        Message = _localizer["DatabaseConnectionException"].Value,
                         Errors = sqlex.Message
                     });
             }
@@ -192,12 +192,12 @@ namespace WebAPITemplate.Controllers
             {
                 return BadRequest(new
                 {
-                    Message = _localizer["InvalidPasswordReset"],
+                    Message = _localizer["InvalidPasswordReset"].Value,
                     Errors = ex.Message
                 });
             }
 
-            return Ok(_localizer["ResetPasswordSuccessfully"]);
+            return Ok(_localizer["ResetPasswordSuccessfully"].Value);
         }
 
         [HttpPost]
@@ -206,24 +206,24 @@ namespace WebAPITemplate.Controllers
         {
             if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
             {
-                return BadRequest(_localizer["InvalidLoginCredentials"]);
+                return BadRequest(_localizer["InvalidLoginCredentials"].Value);
             }
 
             var user = _unitOfWork.UsersRepository.Get(x => x.Email == request.Email).FirstOrDefault();
             if (user == null)
             {
-                return BadRequest(_localizer["InvalidLoginCredentials"]);
+                return BadRequest(_localizer["InvalidLoginCredentials"].Value);
             }
 
             // TODO: REMOVE ON PRODUCTION
             //if (!user.EmailConfirmed)
             //{
-            //    return BadRequest(_localizer["EmailNotVerifiedMessage"]);
+            //    return BadRequest(_localizer["EmailNotVerifiedMessage"].Value);
             //}
 
             if (!Crypto.VerifyHashedPassword(user.PasswordHash, request.Password))
             {
-                return BadRequest(_localizer["InvalidLoginCredentials"]);
+                return BadRequest(_localizer["InvalidLoginCredentials"].Value);
             }
 
             return Ok(new
@@ -232,7 +232,7 @@ namespace WebAPITemplate.Controllers
                 user.UserName,
                 user.DocumentId,
                 request.Password,
-                Message = _localizer["LoginSuccessfully"]
+                message = _localizer["LoginSuccessfully"].Value
             });
         }
 
@@ -240,7 +240,7 @@ namespace WebAPITemplate.Controllers
         [Route("logout")]
         public IActionResult Logout()
         {
-            return Ok(_localizer["LogoutSuccessfully"]);
+            return Ok(_localizer["LogoutSuccessfully"].Value);
         }
 
         [HttpPost]
@@ -250,7 +250,7 @@ namespace WebAPITemplate.Controllers
             var user = _unitOfWork.UsersRepository.GetByID(id);
             if (user == null)
             {
-                return BadRequest(_localizer["InvalidLoginCredentials"]);
+                return BadRequest(_localizer["InvalidLoginCredentials"].Value);
             }
 
             if (UserManager<Users>.ConfirmEmailTokenPurpose != token)
@@ -275,7 +275,7 @@ namespace WebAPITemplate.Controllers
                     (int)HttpStatusCode.InternalServerError,
                     new
                     {
-                        Message = _localizer["DatabaseConnectionException"],
+                        Message = _localizer["DatabaseConnectionException"].Value,
                         Errors = sqlex.Message
                     });
             }
@@ -283,7 +283,7 @@ namespace WebAPITemplate.Controllers
             {
                 return BadRequest(new
                 {
-                    Message = _localizer["InvalidUserCreation"],
+                    Message = _localizer["InvalidUserCreation"].Value,
                     Errors = ex.Message
                 });
             }

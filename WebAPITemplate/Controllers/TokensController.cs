@@ -48,12 +48,12 @@ namespace WebAPITemplate.Controllers
         {
             if (!user.EmailConfirmed)
             {
-                return BadRequest(_localizer["EmailNotVerifiedMessage"]);
+                return BadRequest(_localizer["EmailNotVerifiedMessage"].Value);
             }
 
             if (!Crypto.VerifyHashedPassword(user.PasswordHash, password))
             {
-                return BadRequest(_localizer["InvalidLoginCredentials"]);
+                return BadRequest(_localizer["InvalidLoginCredentials"].Value);
             }
 
             try
@@ -94,6 +94,7 @@ namespace WebAPITemplate.Controllers
                     UserId = user.Id,
                     Value = jwtToken
                 });
+                _unitOfWork.Save();
 
                 return jwtToken;
             }

@@ -163,7 +163,7 @@
     <value>Nombre completo tiene como maximo {0} caracteres de largo.</value>
   </data>
   <data name="LoginSuccessfully" xml:space="preserve">
-    <value>Usted se a iniciao sesion correctamente.</value>
+    <value>Usted inicio sesion correctamente.</value>
   </data>
   <data name="LogoutSuccessfully" xml:space="preserve">
     <value>Usted a cerrado sesion correctamente.</value>
