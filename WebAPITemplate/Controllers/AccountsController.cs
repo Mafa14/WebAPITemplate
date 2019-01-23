@@ -41,26 +41,26 @@ namespace WebAPITemplate.Controllers
         {
             List<string> errors = new List<string>();
 
-            if (!BasicFieldsValidatior.IsDocumentIdLengthValid(request.DocumentId))
+            if (!BasicFieldsValidator.IsDocumentIdLengthValid(request.DocumentId))
             {
-                errors.Add(string.Format(_localizer["InvalidDocumentIdLength"].Value, BasicFieldsValidatior.DocumentMinLength));
+                errors.Add(string.Format(_localizer["InvalidDocumentIdLength"].Value, BasicFieldsValidator.DocumentMinLength));
             }
 
-            if (!BasicFieldsValidatior.IsStringValid(request.UserName))
+            if (!BasicFieldsValidator.IsStringValid(request.UserName))
             {
-                errors.Add(string.Format(_localizer["InvalidUserNameLength"].Value, BasicFieldsValidatior.StandardStringMaxLength));
+                errors.Add(string.Format(_localizer["InvalidUserNameLength"].Value, BasicFieldsValidator.StandardStringMaxLength));
             }
 
-            if (!BasicFieldsValidatior.IsEmailValid(request.Email))
+            if (!BasicFieldsValidator.IsEmailValid(request.Email))
             {
                 errors.Add(_localizer["InvalidEmailFormat"].Value);
             }
 
-            if (!BasicFieldsValidatior.IsPasswordLengthValid(request.Password))
+            if (!BasicFieldsValidator.IsPasswordLengthValid(request.Password))
             {
                 errors.Add(string.Format(_localizer["InvalidPasswordLength"].Value,
-                    BasicFieldsValidatior.PasswordMinLength,
-                    BasicFieldsValidatior.PasswordMaxLength));
+                    BasicFieldsValidator.PasswordMinLength,
+                    BasicFieldsValidator.PasswordMaxLength));
             }
 
             if (request.Password != request.ConfirmPassword)
@@ -70,7 +70,7 @@ namespace WebAPITemplate.Controllers
 
             if (request.ConfirmationUrl == null)
             {
-                return BadRequest("Un error ocurrio con los datos proporcionados del usuario.");
+                return BadRequest(_localizer["MissingHiddenDataMessage"].Value);
             }
 
             if (errors.Any())
@@ -86,7 +86,8 @@ namespace WebAPITemplate.Controllers
                 NormalizedUserName = request.UserName,
                 Email = request.Email,
                 NormalizedEmail = request.Email,
-                PasswordHash = Crypto.HashPassword(request.Password)
+                PasswordHash = Crypto.HashPassword(request.Password),
+                EmailConfirmed = true // TODO: DELETE THIS AFTER DEPLOYING THE EMAILING SERVICE
             };
 
             try
@@ -134,7 +135,7 @@ namespace WebAPITemplate.Controllers
 
             if (request.ConfirmationUrl == null)
             {
-                return BadRequest("Un error ocurrio con los datos proporcionados.");
+                return BadRequest(_localizer["MissingHiddenDataMessage"].Value);
             }
 
             var tokenVerificationUrl = HttpUtility.UrlDecode(request.ConfirmationUrl)
@@ -159,7 +160,7 @@ namespace WebAPITemplate.Controllers
 
             if (request.Token != UserManager<Users>.ResetPasswordTokenPurpose)
             {
-                return BadRequest("Token incorrect");
+                return BadRequest(_localizer["MissingHiddenDataMessage"].Value);
             }
 
             if (request.Password != request.ConfirmPassword)
@@ -215,11 +216,10 @@ namespace WebAPITemplate.Controllers
                 return BadRequest(_localizer["InvalidLoginCredentials"].Value);
             }
 
-            // TODO: REMOVE ON PRODUCTION
-            //if (!user.EmailConfirmed)
-            //{
-            //    return BadRequest(_localizer["EmailNotVerifiedMessage"].Value);
-            //}
+            if (!user.EmailConfirmed)
+            {
+                return BadRequest(_localizer["EmailNotVerifiedMessage"].Value);
+            }
 
             if (!Crypto.VerifyHashedPassword(user.PasswordHash, request.Password))
             {
@@ -228,9 +228,13 @@ namespace WebAPITemplate.Controllers
 
             return Ok(new
             {
-                user.Email,
+                user.Id,
                 user.UserName,
+                user.Email,
+                user.PhoneNumber,
+                user.BirthDate,
                 user.DocumentId,
+                user.Address,
                 request.Password,
                 message = _localizer["LoginSuccessfully"].Value
             });
@@ -255,7 +259,7 @@ namespace WebAPITemplate.Controllers
 
             if (UserManager<Users>.ConfirmEmailTokenPurpose != token)
             {
-                return BadRequest("Token incorrect");
+                return BadRequest(_localizer["MissingHiddenDataMessage"].Value);
             }
 
             if (user.EmailConfirmed)
@@ -283,12 +287,65 @@ namespace WebAPITemplate.Controllers
             {
                 return BadRequest(new
                 {
-                    Message = _localizer["InvalidUserCreation"].Value,
+                    Message = _localizer["InvalidUserUpdate"].Value,
                     Errors = ex.Message
                 });
             }
 
             return Ok();
+        }
+
+        [HttpPost]
+        [Route("change")]
+        public async Task<IActionResult> ChangePassword(ChangePasswordRequest request)
+        {
+            var user = _unitOfWork.UsersRepository.GetByID(request.Id);
+            if (user == null)
+            {
+                throw new InvalidOperationException();
+            }
+
+            if (!Crypto.VerifyHashedPassword(user.PasswordHash, request.OldPassword))
+            {
+                return BadRequest(_localizer["InvalidPassword"].Value);
+            }
+
+            if (request.NewPassword != request.NewConfirmPassword)
+            {
+                return BadRequest(_localizer["InvalidPasswordsMatch"].Value);
+            }
+
+            var resetPasswordResult = _unitOfWork.UsersRepository.ResetPassword(user, request.NewPassword);
+            if (!resetPasswordResult)
+            {
+                return BadRequest(_localizer["InvalidPasswordReset"].Value);
+            }
+
+            try
+            {
+                _unitOfWork.UsersRepository.Update(user);
+                await _unitOfWork.SaveAsync();
+            }
+            catch (SqlException sqlex)
+            {
+                return StatusCode(
+                    (int)HttpStatusCode.InternalServerError,
+                    new
+                    {
+                        Message = _localizer["DatabaseConnectionException"].Value,
+                        Errors = sqlex.Message
+                    });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    Message = _localizer["InvalidPasswordReset"].Value,
+                    Errors = ex.Message
+                });
+            }
+
+            return Ok(_localizer["ResetPasswordSuccessfully"].Value);
         }
     }
 }

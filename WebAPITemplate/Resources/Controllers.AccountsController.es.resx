@@ -118,49 +118,61 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="DatabaseConnectionException" xml:space="preserve">
-    <value>Error comunicandose con la base de datos, ver los registros para mas detalles</value>
+    <value>Error comunicándose con la base de datos, ver los registros para mas detalles.</value>
   </data>
   <data name="EmailNotVerifiedMessage" xml:space="preserve">
-    <value>Email no confirmado, por favor verificar su email por link de verificacion</value>
+    <value>Email no confirmado, verifique su email por el link verificador.</value>
   </data>
   <data name="EmailVerificationMessage" xml:space="preserve">
-    <value>Click en &lt;a href="{0}"&gt;here&lt;/a&gt; para verificar tu email.</value>
+    <value>Haz click aquí &lt;a href="{0}"&gt;here&lt;/a&gt; para verificar tu email.</value>
   </data>
   <data name="EmailVerificationSubject" xml:space="preserve">
-    <value>Verifique su email</value>
+    <value>Verificación de email</value>
   </data>
   <data name="ForgotPasswordCheckEmailMessage" xml:space="preserve">
-    <value>Verifica tu email por un link para reinciar tu contraseña</value>
+    <value>Recibirás en tu email por un link para reiniciar tu contraseña.</value>
   </data>
   <data name="ForgotPasswordMessage" xml:space="preserve">
-    <value>Click en &lt;a href="{0}"&gt;here&lt;/a&gt; para reiniciar tu contraseña</value>
+    <value>Haz click aquí &lt;a href="{0}"&gt;here&lt;/a&gt; para reiniciar tu contraseña.</value>
   </data>
   <data name="ForgotPasswordSubject" xml:space="preserve">
-    <value>Contraseña reiniciada</value>
+    <value>Reiniciar contraseña</value>
+  </data>
+  <data name="InvalidBirthDateRange" xml:space="preserve">
+    <value>Fecha incorrecta, debe ser mayor a {0} y menor a {1}.</value>
   </data>
   <data name="InvalidDocumentIdLength" xml:space="preserve">
-    <value>Documento de identidad debe ser mayor a {0} caracteres de largo.</value>
+    <value>Documento de identidad debe ser mayor a {0} caracteres.</value>
   </data>
   <data name="InvalidEmailFormat" xml:space="preserve">
     <value>Email tiene un formato invalido.</value>
   </data>
   <data name="InvalidLoginCredentials" xml:space="preserve">
-    <value>Email y/o Contraseña invalida</value>
+    <value>Email y/o Contraseña invalida.</value>
+  </data>
+  <data name="InvalidPassword" xml:space="preserve">
+    <value>Contraseña invalida.</value>
   </data>
   <data name="InvalidPasswordLength" xml:space="preserve">
-    <value>Contraseña debe tener entre {0} a {1} caracteres de largo.</value>
+    <value>Contraseña debe tener entre {0} a {1} caracteres.</value>
   </data>
   <data name="InvalidPasswordReset" xml:space="preserve">
-    <value>Un error ocurrio al reiniciar su contraseña, ver los registros para mas detalles</value>
+    <value>Un error ocurrió al reiniciar su contraseña, ver los registros para mas detalles.</value>
   </data>
   <data name="InvalidPasswordsMatch" xml:space="preserve">
-    <value>Las contraseñas no son iguales, contraseña y repetir contraseña deben ser iguales.</value>
+    <value>Las contraseña y la confirmación deben coincidir.</value>
+  </data>
+  <data name="InvalidUser" xml:space="preserve">
+    <value>Usuario invalido.</value>
   </data>
   <data name="InvalidUserCreation" xml:space="preserve">
-    <value>Un error ocurrio al crear el usuario, ver los registros para mas detalles</value>
+    <value>Un error ocurrió al crear el usuario, ver los registros para mas detalles.</value>
   </data>
   <data name="InvalidUserNameLength" xml:space="preserve">
-    <value>Nombre completo tiene como maximo {0} caracteres de largo.</value>
+    <value>Nombre completo tiene como máximo {0} caracteres de largo.</value>
+  </data>
+  <data name="InvalidUserUpdate" xml:space="preserve">
+    <value>Un error ocurrió al actualizar el usuario, ver los registros para mas detalles.</value>
   </data>
   <data name="LoginSuccessfully" xml:space="preserve">
     <value>Usted inicio sesion correctamente.</value>
@@ -168,28 +180,37 @@
   <data name="LogoutSuccessfully" xml:space="preserve">
     <value>Usted a cerrado sesion correctamente.</value>
   </data>
+  <data name="MissingHiddenDataMessage" xml:space="preserve">
+    <value>Ocurrio un error, faltan datos para procesar la orden.</value>
+  </data>
   <data name="PasswordEmptyMessage" xml:space="preserve">
-    <value>Contraseña no debe ser vacia.</value>
+    <value>Contraseña no debe ser vacía.</value>
   </data>
   <data name="PasswordLengthMessage" xml:space="preserve">
-    <value>Contraseña debe tener de 6 as 20 caracteres de largo.</value>
+    <value>Contraseña debe tener de {0} as {1} caracteres.</value>
   </data>
   <data name="PasswordLowerCaseMessage" xml:space="preserve">
-    <value>Contraseña debe contener al menos una letra en minuscula.</value>
+    <value>Contraseña debe contener al menos una letra en minúscula.</value>
   </data>
   <data name="PasswordNumericMessage" xml:space="preserve">
-    <value>Contraseña debe contener al menos un valor numerico.</value>
+    <value>Contraseña debe contener al menos un valor numérico.</value>
   </data>
   <data name="PasswordSpecialCharMessage" xml:space="preserve">
-    <value>Contraseña debe contener al menos un caracter especial.</value>
+    <value>Contraseña debe contener al menos un carácter especial.</value>
   </data>
   <data name="PasswordUpperCaseMessage" xml:space="preserve">
-    <value>Contraseña debe contener al menos una letra en mayuzcula.</value>
+    <value>Contraseña debe contener al menos una letra en mayúscula.</value>
   </data>
   <data name="RegistrationConfirmationMessage" xml:space="preserve">
-    <value>Registro completado, por favor verifique su email - {0}</value>
+    <value>Registro completado, por favor verifique su email - {0}.</value>
   </data>
   <data name="ResetPasswordSuccessfully" xml:space="preserve">
     <value>Contraseña fue reiniciada satisfactoriamente.</value>
+  </data>
+  <data name="UserUpdateConfirmationMessage" xml:space="preserve">
+    <value>Datos actualizados correctamente.</value>
+  </data>
+  <data name="UserUpdateConfirmationMessageWithEmail" xml:space="preserve">
+    <value>Datos actualizados, por favor verifique su email - {0}.</value>
   </data>
 </root>

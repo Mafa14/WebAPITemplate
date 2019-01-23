@@ -15,7 +15,7 @@ namespace WebAPITemplate.Database
                 return false;
             }
 
-            if (!BasicFieldsValidatior.IsPasswordLengthValid(password))
+            if (!BasicFieldsValidator.IsPasswordLengthValid(password))
             {
                 return false;
             }

@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 
 namespace WebAPITemplate.Helpers.Validators
 {
-    public static class BasicFieldsValidatior
+    public static class BasicFieldsValidator
     {
         public const int StandardStringMaxLength = 256;
         public const int PasswordMinLength = 6;

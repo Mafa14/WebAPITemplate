@@ -32,13 +32,13 @@ namespace WebAPITemplate.Controllers
         {
             if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
             {
-                return BadRequest("Email y/o Contraseña invalidos.");
+                return BadRequest(_localizer["InvalidLoginCredentials"].Value);
             }
 
             var user = _unitOfWork.UsersRepository.Get(x => x.Email == request.Email).FirstOrDefault();
             if (user == null)
             {
-                return BadRequest("Email y/o Contraseña invalidos.");
+                return BadRequest(_localizer["InvalidLoginCredentials"].Value);
             }
 
             return new ObjectResult(GenerateToken(user, request.Password));

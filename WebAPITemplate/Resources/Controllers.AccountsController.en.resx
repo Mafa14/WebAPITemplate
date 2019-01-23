@@ -118,78 +118,99 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="DatabaseConnectionException" xml:space="preserve">
-    <value>Error communicating with the database, see logs for more details</value>
+    <value />
   </data>
   <data name="EmailNotVerifiedMessage" xml:space="preserve">
-    <value>Email not confirmed, please check your email for confirmation link</value>
+    <value />
   </data>
   <data name="EmailVerificationMessage" xml:space="preserve">
-    <value>Click &lt;a href="{0}"&gt;here&lt;/a&gt; to verify your email</value>
+    <value />
   </data>
   <data name="EmailVerificationSubject" xml:space="preserve">
-    <value>Verify your email</value>
+    <value />
   </data>
   <data name="ForgotPasswordCheckEmailMessage" xml:space="preserve">
-    <value>Check your email for a password reset link</value>
+    <value />
   </data>
   <data name="ForgotPasswordMessage" xml:space="preserve">
-    <value>Click &lt;a href="{0}"&gt;here&lt;/a&gt; to reset your password</value>
+    <value />
   </data>
   <data name="ForgotPasswordSubject" xml:space="preserve">
-    <value>Password reset</value>
+    <value />
+  </data>
+  <data name="InvalidBirthDateRange" xml:space="preserve">
+    <value />
   </data>
   <data name="InvalidDocumentIdLength" xml:space="preserve">
-    <value>Document Id has to be at least {0} chatacters long.</value>
+    <value />
   </data>
   <data name="InvalidEmailFormat" xml:space="preserve">
-    <value>Email format is invalid.</value>
+    <value />
   </data>
   <data name="InvalidLoginCredentials" xml:space="preserve">
-    <value>Email and/or Password invalid</value>
+    <value />
+  </data>
+  <data name="InvalidPassword" xml:space="preserve">
+    <value />
   </data>
   <data name="InvalidPasswordLength" xml:space="preserve">
-    <value>Password has to be {0} to {1} characters long.</value>
+    <value />
   </data>
   <data name="InvalidPasswordReset" xml:space="preserve">
-    <value>An error occurred while resetting the password, see logs for more details.</value>
+    <value />
   </data>
   <data name="InvalidPasswordsMatch" xml:space="preserve">
-    <value>Passwords don't match, password and repeat password should contain the same values.</value>
+    <value />
+  </data>
+  <data name="InvalidUser" xml:space="preserve">
+    <value />
   </data>
   <data name="InvalidUserCreation" xml:space="preserve">
-    <value>An error occurred when creating the user, see logs for more details</value>
+    <value />
   </data>
   <data name="InvalidUserNameLength" xml:space="preserve">
-    <value>User Name has a maximum of {0} characters long.</value>
+    <value />
+  </data>
+  <data name="InvalidUserUpdate" xml:space="preserve">
+    <value />
   </data>
   <data name="LoginSuccessfully" xml:space="preserve">
-    <value>You have logged in successfully.</value>
+    <value />
   </data>
   <data name="LogoutSuccessfully" xml:space="preserve">
-    <value>You have been successfully logged out.</value>
+    <value />
+  </data>
+  <data name="MissingHiddenDataMessage" xml:space="preserve">
+    <value />
   </data>
   <data name="PasswordEmptyMessage" xml:space="preserve">
-    <value>Password should not be empty</value>
+    <value />
   </data>
   <data name="PasswordLengthMessage" xml:space="preserve">
-    <value>Password should be 6 to 20 characters long</value>
+    <value />
   </data>
   <data name="PasswordLowerCaseMessage" xml:space="preserve">
-    <value>Password should contain at least one lower case letter</value>
+    <value />
   </data>
   <data name="PasswordNumericMessage" xml:space="preserve">
-    <value>Password should contain at least one numeric value</value>
+    <value />
   </data>
   <data name="PasswordSpecialCharMessage" xml:space="preserve">
-    <value>Password should contain at least one special case characters</value>
+    <value />
   </data>
   <data name="PasswordUpperCaseMessage" xml:space="preserve">
-    <value>Password should contain at least one upper case letter</value>
+    <value />
   </data>
   <data name="RegistrationConfirmationMessage" xml:space="preserve">
-    <value>Registration completed, please verify your email - {0}</value>
+    <value />
   </data>
   <data name="ResetPasswordSuccessfully" xml:space="preserve">
-    <value>Password was reset successfully.</value>
+    <value />
+  </data>
+  <data name="UserUpdateConfirmationMessage" xml:space="preserve">
+    <value />
+  </data>
+  <data name="UserUpdateConfirmationMessageWithEmail" xml:space="preserve">
+    <value />
   </data>
 </root>
