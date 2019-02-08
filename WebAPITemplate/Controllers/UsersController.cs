@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
+﻿using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 using System;
@@ -8,9 +7,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
-using System.Web;
 using WebAPITemplate.Database;
-using WebAPITemplate.Database.Models;
 using WebAPITemplate.Helpers.Validators;
 using WebAPITemplate.RequestContracts;
 
@@ -37,7 +34,6 @@ namespace WebAPITemplate.Controllers
         public async Task<IActionResult> Update(UserRequest request)
         {
             var errors = new List<string>();
-            var emailChanged = false;
 
             var user = _unitOfWork.UsersRepository.GetByID(request.Id);
             if (user == null)
@@ -55,16 +51,6 @@ namespace WebAPITemplate.Controllers
                 errors.Add(string.Format(_localizer["InvalidUserNameLength"].Value, BasicFieldsValidator.StandardStringMaxLength));
             }
 
-            if (!BasicFieldsValidator.IsEmailValid(request.Email))
-            {
-                errors.Add(_localizer["InvalidEmailFormat"].Value);
-            }
-            else
-            {
-                emailChanged = true;
-                user.EmailConfirmed = false;
-            }
-            // TODO: Adjust after the UI modification
             if (!BasicFieldsValidator.IsStringValid(request.Address))
             {
                 errors.Add(string.Format(_localizer["InvalidUserNameLength"].Value, BasicFieldsValidator.StandardStringMaxLength));
@@ -86,7 +72,6 @@ namespace WebAPITemplate.Controllers
             }
 
             user.UserName = request.UserName;
-            user.Email = request.Email;
             user.DocumentId = request.DocumentId;
             user.BirthDate = request.BirthDate;
             user.PhoneNumber = request.PhoneNumber;
@@ -97,36 +82,16 @@ namespace WebAPITemplate.Controllers
                 _unitOfWork.UsersRepository.Update(user);
                 await _unitOfWork.SaveAsync();
             }
-            catch (SqlException sqlex)
+            catch (SqlException)
             {
-                return StatusCode(
-                    (int)HttpStatusCode.InternalServerError,
-                    new
-                    {
-                        Message = _localizer["DatabaseConnectionException"].Value,
-                        Errors = sqlex.Message
-                    });
+                return StatusCode((int)HttpStatusCode.InternalServerError, _localizer["DatabaseConnectionException"].Value);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return BadRequest(new
-                {
-                    Message = _localizer["InvalidUserUpdate"].Value,
-                    Errors = ex.Message
-                });
+                return BadRequest(_localizer["InvalidUserUpdate"].Value);
             }
 
-            if (emailChanged)
-            {
-                var tokenVerificationUrl = HttpUtility.UrlDecode(request.ConfirmationUrl)
-               .Replace("#Id", user.Id)
-               .Replace("#Token", UserManager<Users>.ConfirmEmailTokenPurpose);
-                await _emailService.SendEmailAsync(request.Email, _localizer["EmailVerificationSubject"].Value,
-                    string.Format(_localizer["EmailVerificationMessage"].Value, tokenVerificationUrl));
-            }
-
-            return Ok(string.Format(_localizer[emailChanged ? "UserUpdateConfirmationMessageWithEmail"
-                : "UserUpdateConfirmationMessage"].Value, request.Email));
+            return Ok(_localizer["UserUpdateConfirmationMessage"].Value);
         }
     }
 }

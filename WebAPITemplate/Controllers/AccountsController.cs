@@ -95,23 +95,13 @@ namespace WebAPITemplate.Controllers
                 _unitOfWork.UsersRepository.Insert(newUser);
                 await _unitOfWork.SaveAsync();
             }
-            catch (SqlException sqlex)
+            catch (SqlException)
             {
-                return StatusCode(
-                    (int)HttpStatusCode.InternalServerError,
-                    new
-                    {
-                        Message = _localizer["DatabaseConnectionException"].Value,
-                        Errors = sqlex.Message
-                    });
+                return StatusCode((int)HttpStatusCode.InternalServerError, _localizer["DatabaseConnectionException"].Value);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return BadRequest(new
-                {
-                    Message = _localizer["InvalidUserCreation"].Value,
-                    Errors = ex.Message
-                });
+                return BadRequest(_localizer["InvalidUserCreation"].Value);
             }
 
             var tokenVerificationUrl = HttpUtility.UrlDecode(request.ConfirmationUrl)
@@ -179,23 +169,13 @@ namespace WebAPITemplate.Controllers
                 _unitOfWork.UsersRepository.Update(user);
                 await _unitOfWork.SaveAsync();
             }
-            catch (SqlException sqlex)
+            catch (SqlException)
             {
-                return StatusCode(
-                    (int)HttpStatusCode.InternalServerError,
-                    new
-                    {
-                        Message = _localizer["DatabaseConnectionException"].Value,
-                        Errors = sqlex.Message
-                    });
+                return StatusCode((int)HttpStatusCode.InternalServerError, _localizer["DatabaseConnectionException"].Value);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return BadRequest(new
-                {
-                    Message = _localizer["InvalidPasswordReset"].Value,
-                    Errors = ex.Message
-                });
+                return BadRequest(_localizer["InvalidPasswordReset"].Value);
             }
 
             return Ok(_localizer["ResetPasswordSuccessfully"].Value);
@@ -273,23 +253,13 @@ namespace WebAPITemplate.Controllers
                 _unitOfWork.UsersRepository.Update(user);
                 _unitOfWork.Save();
             }
-            catch (SqlException sqlex)
+            catch (SqlException)
             {
-                return StatusCode(
-                    (int)HttpStatusCode.InternalServerError,
-                    new
-                    {
-                        Message = _localizer["DatabaseConnectionException"].Value,
-                        Errors = sqlex.Message
-                    });
+                return StatusCode((int)HttpStatusCode.InternalServerError, _localizer["DatabaseConnectionException"].Value);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return BadRequest(new
-                {
-                    Message = _localizer["InvalidUserUpdate"].Value,
-                    Errors = ex.Message
-                });
+                return BadRequest(_localizer["InvalidUserUpdate"].Value);
             }
 
             return Ok();
@@ -326,23 +296,13 @@ namespace WebAPITemplate.Controllers
                 _unitOfWork.UsersRepository.Update(user);
                 await _unitOfWork.SaveAsync();
             }
-            catch (SqlException sqlex)
+            catch (SqlException)
             {
-                return StatusCode(
-                    (int)HttpStatusCode.InternalServerError,
-                    new
-                    {
-                        Message = _localizer["DatabaseConnectionException"].Value,
-                        Errors = sqlex.Message
-                    });
+                return StatusCode((int)HttpStatusCode.InternalServerError, _localizer["DatabaseConnectionException"].Value);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return BadRequest(new
-                {
-                    Message = _localizer["InvalidPasswordReset"].Value,
-                    Errors = ex.Message
-                });
+                return BadRequest(_localizer["InvalidPasswordReset"].Value);
             }
 
             return Ok(_localizer["ResetPasswordSuccessfully"].Value);
