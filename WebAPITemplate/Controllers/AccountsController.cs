@@ -211,10 +211,7 @@ namespace WebAPITemplate.Controllers
                 user.Id,
                 user.UserName,
                 user.Email,
-                user.PhoneNumber,
-                user.BirthDate,
                 user.DocumentId,
-                user.Address,
                 request.Password,
                 message = _localizer["LoginSuccessfully"].Value
             });

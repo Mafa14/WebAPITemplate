@@ -30,8 +30,29 @@ namespace WebAPITemplate.Controllers
             _localizer = localizer;
         }
 
+        [HttpGet]
+        public IActionResult Get(string id)
+        {
+            var user = _unitOfWork.UsersRepository.GetByID(id);
+            if (user == null)
+            {
+                return BadRequest(_localizer["InvalidUser"].Value);
+            }
+
+            return Ok(new
+            {
+                user.Id,
+                user.UserName,
+                user.Email,
+                user.PhoneNumber,
+                user.BirthDate,
+                user.DocumentId,
+                user.Address
+            });
+        }
+
         [HttpPut]
-        public async Task<IActionResult> Update(UserRequest request)
+        public async Task<IActionResult> Update(UserUpdateRequest request)
         {
             var errors = new List<string>();
 
