@@ -1,4 +1,5 @@
 ﻿using CryptoHelper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -12,13 +13,15 @@ using System.Threading.Tasks;
 using System.Web;
 using WebAPITemplate.Database;
 using WebAPITemplate.Database.Models;
+using WebAPITemplate.Helpers.Token;
 using WebAPITemplate.Helpers.Validators;
 using WebAPITemplate.RequestContracts;
 
 namespace WebAPITemplate.Controllers
 {
-    [Route("api/[controller]")]
+    [Authorize]
     [ApiController]
+    [Route("api/[controller]")]
     public class AccountsController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -36,6 +39,7 @@ namespace WebAPITemplate.Controllers
         }
 
         [HttpPost]
+        [AllowAnonymous]
         [Route("register")]
         public async Task<IActionResult> Register(RegisterRequest request)
         {
@@ -114,6 +118,7 @@ namespace WebAPITemplate.Controllers
         }
 
         [HttpPost]
+        [AllowAnonymous]
         [Route("forgot")]
         public async Task<IActionResult> ForgotPassword(ForgotPasswordRequest request)
         {
@@ -139,6 +144,7 @@ namespace WebAPITemplate.Controllers
         }
 
         [HttpPost]
+        [AllowAnonymous]
         [Route("reset")]
         public async Task<IActionResult> ResetPassword(ResetPasswordRequest request)
         {
@@ -182,6 +188,7 @@ namespace WebAPITemplate.Controllers
         }
 
         [HttpPost]
+        [AllowAnonymous]
         [Route("login")]
         public IActionResult Login(LoginRequest request)
         {
@@ -206,13 +213,27 @@ namespace WebAPITemplate.Controllers
                 return BadRequest(_localizer["InvalidLoginCredentials"].Value);
             }
 
+            object generatedToken = null;
+            try
+            {
+                generatedToken = TokenHandler.GenerateToken(_localizer, _unitOfWork, user, request.Password);
+            }
+            catch (MissingFieldException mfe)
+            {
+                return BadRequest(mfe.Message);
+            }
+            catch (InvalidCastException ice)
+            {
+                return BadRequest(ice.Message);
+            }
+
             return Ok(new
             {
                 user.Id,
                 user.UserName,
                 user.Email,
                 user.DocumentId,
-                request.Password,
+                token = generatedToken,
                 message = _localizer["LoginSuccessfully"].Value
             });
         }
@@ -225,6 +246,7 @@ namespace WebAPITemplate.Controllers
         }
 
         [HttpPost]
+        [AllowAnonymous]
         [Route("confirm/email")]
         public IActionResult ConfirmEmail(string id, string token)
         {

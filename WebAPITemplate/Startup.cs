@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Localization;
@@ -12,9 +13,11 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
+using System.Threading.Tasks;
 using WebAPITemplate.Database;
 using WebAPITemplate.Helpers;
 using WebAPITemplate.Helpers.Messages;
+using WebAPITemplate.Helpers.Token;
 
 namespace WebAPITemplate
 {
@@ -57,6 +60,22 @@ namespace WebAPITemplate
             })
             .AddJwtBearer(Globals.TokenAuthenticateScheme, jwtBearerOptions =>
             {
+                jwtBearerOptions.Events = new JwtBearerEvents
+                {
+                    OnTokenValidated = context =>
+                    {
+                        var unitOfWork = context.HttpContext.RequestServices.GetRequiredService<IUnitOfWork>();
+                        var userId = context.Principal.Identity.Name;
+                        var user = unitOfWork.UsersRepository.GetByID(userId);
+                        if (user == null)
+                        {
+                            context.Fail("Unauthorized");
+                        }
+                        return Task.CompletedTask;
+                    }
+                };
+                jwtBearerOptions.RequireHttpsMetadata = false;
+                jwtBearerOptions.SaveToken = true;
                 jwtBearerOptions.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
