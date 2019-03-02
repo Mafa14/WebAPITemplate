@@ -17,7 +17,6 @@ using System.Threading.Tasks;
 using WebAPITemplate.Database;
 using WebAPITemplate.Helpers;
 using WebAPITemplate.Helpers.Messages;
-using WebAPITemplate.Helpers.Token;
 
 namespace WebAPITemplate
 {

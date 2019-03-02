@@ -11,6 +11,9 @@ using System.Threading.Tasks;
 using WebAPITemplate.Database;
 using WebAPITemplate.Helpers.Validators;
 using WebAPITemplate.RequestContracts;
+using WebAPITemplate.RequestContracts.DataTable;
+using WebAPITemplate.ResponseContracts;
+using WebAPITemplate.ResponseContracts.DataTable;
 
 namespace WebAPITemplate.Controllers
 {
@@ -52,6 +55,52 @@ namespace WebAPITemplate.Controllers
                 user.Address
             });
         }
+
+        [HttpPost]
+        [Route("all")]
+        public IActionResult GetAll(DataTableRequest request)
+        {
+            var users = _unitOfWork.UsersRepository.Get();
+            if (users == null)
+            {
+                return BadRequest(_localizer["InvalidUser"].Value);
+            }
+
+            var result = new List<UserListResponse>();
+
+            foreach (var user in users)
+            {
+                result.Add(new UserListResponse()
+                {
+                    UserName = user.UserName,
+                    DocumentId = user.DocumentId,
+                    Email = user.Email,
+                    PhoneNumber = user.PhoneNumber
+                });
+            }
+
+            return Ok(new DataTableResponse()
+            {
+                Draw = request.Draw,
+                RecordsFiltered = users.Count(),
+                RecordsTotal = users.Count(),
+                Data = result.ToArray(),
+                Error = string.Empty
+            });
+        }
+
+        //[HttpPost]
+        //[Route("all")]
+        //public IActionResult GetAll()
+        //{
+        //    var users = _unitOfWork.UsersRepository.Get();
+        //    if (users == null)
+        //    {
+        //        return BadRequest(_localizer["InvalidUser"].Value);
+        //    }
+
+        //    return Ok(users);
+        //}
 
         [HttpPut]
         public async Task<IActionResult> Update(UserUpdateRequest request)
@@ -115,6 +164,32 @@ namespace WebAPITemplate.Controllers
             }
 
             return Ok(_localizer["UserUpdateConfirmationMessage"].Value);
+        }
+
+        [HttpDelete]
+        public async Task<IActionResult> Delete(string id)
+        {
+            var user = _unitOfWork.UsersRepository.GetByID(id);
+            if (user == null)
+            {
+                return BadRequest(_localizer["InvalidUser"].Value);
+            }
+
+            try
+            {
+                _unitOfWork.UsersRepository.Delete(user);
+                await _unitOfWork.SaveAsync();
+            }
+            catch (SqlException)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, _localizer["DatabaseConnectionException"].Value);
+            }
+            catch (Exception)
+            {
+                return BadRequest(_localizer["InvalidUserDelete"].Value);
+            }
+
+            return Ok(_localizer["UserDeleteConfirmationMessage"].Value);
         }
     }
 }

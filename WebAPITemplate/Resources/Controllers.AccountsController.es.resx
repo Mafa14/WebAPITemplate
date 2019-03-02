@@ -168,6 +168,9 @@
   <data name="InvalidUserCreation" xml:space="preserve">
     <value>Un error ocurrió al crear el usuario, ver los registros para mas detalles.</value>
   </data>
+  <data name="InvalidUserDelete" xml:space="preserve">
+    <value>Un error ocurrió al eliminar el usuario, ver los registros para mas detalles.</value>
+  </data>
   <data name="InvalidUserNameLength" xml:space="preserve">
     <value>Nombre completo tiene como máximo {0} caracteres de largo.</value>
   </data>
@@ -206,6 +209,9 @@
   </data>
   <data name="ResetPasswordSuccessfully" xml:space="preserve">
     <value>Contraseña fue reiniciada satisfactoriamente.</value>
+  </data>
+  <data name="UserDeleteConfirmationMessage" xml:space="preserve">
+    <value>Usuario eliminado correctamente.</value>
   </data>
   <data name="UserUpdateConfirmationMessage" xml:space="preserve">
     <value>Datos actualizados correctamente.</value>
