@@ -9,6 +9,8 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using WebAPITemplate.Database;
+using WebAPITemplate.Database.Models;
+using WebAPITemplate.Helpers.DataTables;
 using WebAPITemplate.Helpers.Validators;
 using WebAPITemplate.RequestContracts;
 using WebAPITemplate.RequestContracts.DataTable;
@@ -60,17 +62,17 @@ namespace WebAPITemplate.Controllers
         [Route("all")]
         public IActionResult GetAll(DataTableRequest request)
         {
-            var users = _unitOfWork.UsersRepository.Get();
+            var users = _unitOfWork.UsersRepository.Get(request);
             if (users == null)
             {
                 return BadRequest(_localizer["InvalidUser"].Value);
             }
 
-            var result = new List<UserListResponse>();
+            var result = new List<UserList>();
 
             foreach (var user in users)
             {
-                result.Add(new UserListResponse()
+                result.Add(new UserList()
                 {
                     UserName = user.UserName,
                     DocumentId = user.DocumentId,
@@ -88,19 +90,6 @@ namespace WebAPITemplate.Controllers
                 Error = string.Empty
             });
         }
-
-        //[HttpPost]
-        //[Route("all")]
-        //public IActionResult GetAll()
-        //{
-        //    var users = _unitOfWork.UsersRepository.Get();
-        //    if (users == null)
-        //    {
-        //        return BadRequest(_localizer["InvalidUser"].Value);
-        //    }
-
-        //    return Ok(users);
-        //}
 
         [HttpPut]
         public async Task<IActionResult> Update(UserUpdateRequest request)
