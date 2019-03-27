@@ -9,8 +9,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using WebAPITemplate.Database;
-using WebAPITemplate.Database.Models;
-using WebAPITemplate.Helpers.DataTables;
+using WebAPITemplate.Helpers;
 using WebAPITemplate.Helpers.Validators;
 using WebAPITemplate.RequestContracts;
 using WebAPITemplate.RequestContracts.DataTable;
@@ -59,33 +58,39 @@ namespace WebAPITemplate.Controllers
         }
 
         [HttpPost]
-        [Route("all")]
-        public IActionResult GetAll(DataTableRequest request)
+        [Route("all/{id}")]
+        public IActionResult GetAll([FromRoute] string id, DataTableRequest request)
         {
-            var users = _unitOfWork.UsersRepository.Get(request);
-            if (users == null)
+            var adminRole = _unitOfWork.RolesRepository.Get(r => r.Name == SystemRoles.Admin.ToString()).FirstOrDefault();
+            var currentUser = _unitOfWork.UsersRepository.Get(u => u.Id == id, includeProperties: u => u.UserRoles).FirstOrDefault();
+
+            if (currentUser.UserRoles == null || !currentUser.UserRoles.Any(ur => ur.RoleId == adminRole.Id))
             {
                 return BadRequest(_localizer["InvalidUser"].Value);
             }
 
             var result = new List<UserList>();
+            var users = _unitOfWork.UsersRepository.Get(request);
 
             foreach (var user in users)
             {
-                result.Add(new UserList()
+                if (user.Id != currentUser.Id)
                 {
-                    UserName = user.UserName,
-                    DocumentId = user.DocumentId,
-                    Email = user.Email,
-                    PhoneNumber = user.PhoneNumber
-                });
+                    result.Add(new UserList()
+                    {
+                        UserName = user.UserName,
+                        DocumentId = user.DocumentId,
+                        Email = user.Email,
+                        PhoneNumber = user.PhoneNumber
+                    });
+                }
             }
 
             return Ok(new DataTableResponse()
             {
                 Draw = request.Draw,
-                RecordsFiltered = users.Count(),
-                RecordsTotal = users.Count(),
+                RecordsFiltered = users != null ? users.Count() : 0,
+                RecordsTotal = users != null ? users.Count() : 0,
                 Data = result.ToArray(),
                 Error = string.Empty
             });
@@ -112,14 +117,14 @@ namespace WebAPITemplate.Controllers
                 errors.Add(string.Format(_localizer["InvalidUserNameLength"].Value, BasicFieldsValidator.StandardStringMaxLength));
             }
 
-            if (!BasicFieldsValidator.IsStringValid(request.Address))
+            if (request.Address.Trim() != string.Empty && !BasicFieldsValidator.IsStringValid(request.Address))
             {
-                errors.Add(string.Format(_localizer["InvalidUserNameLength"].Value, BasicFieldsValidator.StandardStringMaxLength));
+                errors.Add(string.Format(_localizer["InvalidUserAddressLength"].Value, BasicFieldsValidator.DatabaseStringMaxLength));
             }
 
-            if (!BasicFieldsValidator.IsStringValid(request.PhoneNumber))
+            if (request.PhoneNumber.Trim() != string.Empty && !BasicFieldsValidator.IsStringValid(request.PhoneNumber))
             {
-                errors.Add(string.Format(_localizer["InvalidUserNameLength"].Value, BasicFieldsValidator.StandardStringMaxLength));
+                errors.Add(string.Format(_localizer["InvalidUserPhoneNumberLength"].Value, BasicFieldsValidator.DatabaseStringMaxLength));
             }
 
             if (request.BirthDate.Year < 1900 && request.BirthDate.Year > DateTime.Today.AddYears(1).Year)

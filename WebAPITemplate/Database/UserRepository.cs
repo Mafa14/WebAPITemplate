@@ -1,6 +1,9 @@
 ﻿using CryptoHelper;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using WebAPITemplate.Database.Models;
 using WebAPITemplate.Helpers.DataTables;
 using WebAPITemplate.Helpers.Validators;
@@ -37,6 +40,17 @@ namespace WebAPITemplate.Database
             if (filter != null)
             {
                 query = query.Where(filter);
+            }
+
+            List<Expression<Func<Users, object>>> includeProperties = new List<Expression<Func<Users, object>>>();
+            includeProperties.Add(u => u.UserClaims);
+            includeProperties.Add(u => u.UserLogins);
+            includeProperties.Add(u => u.UserRoles);
+            includeProperties.Add(u => u.UserTokens);
+
+            foreach (var includeProperty in includeProperties)
+            {
+                query = query.Include(includeProperty);
             }
 
             if (request.Order != null && request.Order.Count() > 0)

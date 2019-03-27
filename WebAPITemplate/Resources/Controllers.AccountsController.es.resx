@@ -165,6 +165,9 @@
   <data name="InvalidUser" xml:space="preserve">
     <value>Usuario invalido.</value>
   </data>
+  <data name="InvalidUserAddressLength" xml:space="preserve">
+    <value>Dirección tiene como máximo {0} caracteres de largo.</value>
+  </data>
   <data name="InvalidUserCreation" xml:space="preserve">
     <value>Un error ocurrió al crear el usuario, ver los registros para mas detalles.</value>
   </data>
@@ -173,6 +176,9 @@
   </data>
   <data name="InvalidUserNameLength" xml:space="preserve">
     <value>Nombre completo tiene como máximo {0} caracteres de largo.</value>
+  </data>
+  <data name="InvalidUserPhoneNumberLength" xml:space="preserve">
+    <value>Telefono/Celular tiene como máximo {0} caracteres de largo.</value>
   </data>
   <data name="InvalidUserUpdate" xml:space="preserve">
     <value>Un error ocurrió al actualizar el usuario, ver los registros para mas detalles.</value>

@@ -6,6 +6,7 @@ namespace WebAPITemplate.Helpers.Validators
     public static class BasicFieldsValidator
     {
         public const int StandardStringMaxLength = 256;
+        public const int DatabaseStringMaxLength = 4000;
         public const int PasswordMinLength = 6;
         public const int PasswordMaxLength = 20;
         public const int DocumentMinLength = 6;

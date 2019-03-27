@@ -42,7 +42,13 @@ namespace WebAPITemplate
             services.AddMvc()
                 .AddViewLocalization()
                 .AddDataAnnotationsLocalization()
-                .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+                .SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
+                .AddJsonOptions(options =>
+                {
+                    //Set date configurations
+                    //options.SerializerSettings.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
+                    options.SerializerSettings.DateFormatString = "dd/MM/yyyy"; // month must be capital. otherwise it gives minutes.
+                });
 
             services.AddCors(o => o.AddPolicy("MyPolicy", builder =>
             {

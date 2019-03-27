@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using System.Web;
 using WebAPITemplate.Database;
 using WebAPITemplate.Database.Models;
+using WebAPITemplate.Helpers;
 using WebAPITemplate.Helpers.Token;
 using WebAPITemplate.Helpers.Validators;
 using WebAPITemplate.RequestContracts;
@@ -87,9 +88,7 @@ namespace WebAPITemplate.Controllers
                 Id = Guid.NewGuid().ToString(),
                 DocumentId = request.DocumentId,
                 UserName = request.UserName,
-                NormalizedUserName = request.UserName,
                 Email = request.Email,
-                NormalizedEmail = request.Email,
                 PasswordHash = Crypto.HashPassword(request.Password),
                 EmailConfirmed = true // TODO: DELETE THIS AFTER DEPLOYING THE EMAILING SERVICE
             };
@@ -97,6 +96,15 @@ namespace WebAPITemplate.Controllers
             try
             {
                 _unitOfWork.UsersRepository.Insert(newUser);
+                await _unitOfWork.SaveAsync();
+
+                var roles = _unitOfWork.RolesRepository.Get();
+
+                _unitOfWork.UserRolesRepository.Insert(new UserRoles
+                {
+                    RoleId = roles.First(r => r.Name == SystemRoles.Client.ToString()).Id,
+                    UserId = newUser.Id
+                });
                 await _unitOfWork.SaveAsync();
             }
             catch (SqlException)
@@ -227,6 +235,8 @@ namespace WebAPITemplate.Controllers
                 return BadRequest(ice.Message);
             }
 
+            var userRoles = _unitOfWork.UserRolesRepository.Get(ur => ur.UserId == user.Id, includeProperties: r => r.Role);
+
             return Ok(new
             {
                 user.Id,
@@ -234,6 +244,7 @@ namespace WebAPITemplate.Controllers
                 user.Email,
                 user.DocumentId,
                 token = generatedToken,
+                roles = userRoles != null && userRoles.Select(ur => ur.Role).Any() ? userRoles.Select(ur => ur.Role.Name) : new List<string>(),
                 message = _localizer["LoginSuccessfully"].Value
             });
         }

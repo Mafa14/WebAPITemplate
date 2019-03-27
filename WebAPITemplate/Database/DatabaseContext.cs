@@ -48,16 +48,9 @@ namespace WebAPITemplate.Database
 
             modelBuilder.Entity<Roles>(entity =>
             {
-                entity.HasIndex(e => e.NormalizedName)
-                    .HasName("RoleNameIndex")
-                    .IsUnique()
-                    .HasFilter("([NormalizedName] IS NOT NULL)");
-
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
                 entity.Property(e => e.Name).HasMaxLength(256);
-
-                entity.Property(e => e.NormalizedName).HasMaxLength(256);
             });
 
             modelBuilder.Entity<UserClaims>(entity =>
@@ -101,21 +94,9 @@ namespace WebAPITemplate.Database
 
             modelBuilder.Entity<Users>(entity =>
             {
-                entity.HasIndex(e => e.NormalizedEmail)
-                    .HasName("EmailIndex");
-
-                entity.HasIndex(e => e.NormalizedUserName)
-                    .HasName("UserNameIndex")
-                    .IsUnique()
-                    .HasFilter("([NormalizedUserName] IS NOT NULL)");
-
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
                 entity.Property(e => e.Email).HasMaxLength(256);
-
-                entity.Property(e => e.NormalizedEmail).HasMaxLength(256);
-
-                entity.Property(e => e.NormalizedUserName).HasMaxLength(256);
 
                 entity.Property(e => e.UserName).HasMaxLength(256);
 
