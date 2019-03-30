@@ -43,10 +43,10 @@ namespace WebAPITemplate.Helpers.Token
 
                 var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Globals.TokenSecret));
                 var claims = new Claim[] {
-                    new Claim(ClaimTypes.Name, user.Id.ToString()),
+                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                     new Claim(JwtRegisteredClaimNames.Email, user.Email)
                 };
-                
+
                 var token = new JwtSecurityToken(
                     issuer: Globals.TokenIssuer,
                     audience: Globals.TokenAudience,

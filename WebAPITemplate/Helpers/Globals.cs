@@ -11,5 +11,9 @@
         public const string TokenAudience = "TemplateSite";
         public const string DefaultLoginProvider = "System";
         public const string DefaultTokenName = "SystemToken";
+        public const string EmailLoginProvider = "EmailProvider";
+        public const string EmailTokenName = "EmailToken";
+        public const string ResetPasswordLoginProvider = "ResetPasswordProvider";
+        public const string ResetPasswordTokenName = "ResetPasswordToken";
     }
 }

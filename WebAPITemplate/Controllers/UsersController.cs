@@ -78,6 +78,7 @@ namespace WebAPITemplate.Controllers
                 {
                     result.Add(new UserList()
                     {
+                        Id = user.Id,
                         UserName = user.UserName,
                         DocumentId = user.DocumentId,
                         Email = user.Email,
@@ -161,7 +162,8 @@ namespace WebAPITemplate.Controllers
         }
 
         [HttpDelete]
-        public async Task<IActionResult> Delete(string id)
+        [Route("delete/{id}")]
+        public async Task<IActionResult> Delete([FromRoute] string id)
         {
             var user = _unitOfWork.UsersRepository.GetByID(id);
             if (user == null)
@@ -171,7 +173,53 @@ namespace WebAPITemplate.Controllers
 
             try
             {
+                // Remove Roles
+                var userRoles = _unitOfWork.UserRolesRepository.Get(ur => ur.UserId == id);
+
+                if (userRoles != null && userRoles.Count() > 0)
+                {
+                    foreach (var userRole in userRoles)
+                    {
+                        _unitOfWork.UserRolesRepository.Delete(userRole);
+                    }
+                }
+
+                // Remove Tokens
+                var userTokens = _unitOfWork.UserTokensRepository.Get(ur => ur.UserId == id);
+
+                if (userTokens != null && userTokens.Count() > 0)
+                {
+                    foreach (var userToken in userTokens)
+                    {
+                        _unitOfWork.UserTokensRepository.Delete(userToken);
+                    }
+                }
+
+                // Remove Claims
+                var userClaims = _unitOfWork.UserClaimsRepository.Get(ur => ur.UserId == id);
+
+                if (userClaims != null && userClaims.Count() > 0)
+                {
+                    foreach (var userClaim in userClaims)
+                    {
+                        _unitOfWork.UserClaimsRepository.Delete(userClaim);
+                    }
+                }
+
+                // Remove Logins
+                var userLogins = _unitOfWork.UserLoginsRepository.Get(ur => ur.UserId == id);
+
+                if (userLogins != null && userLogins.Count() > 0)
+                {
+                    foreach (var userLogin in userLogins)
+                    {
+                        _unitOfWork.UserLoginsRepository.Delete(userLogin);
+                    }
+                }
+
+                // Remove User
                 _unitOfWork.UsersRepository.Delete(user);
+
                 await _unitOfWork.SaveAsync();
             }
             catch (SqlException)

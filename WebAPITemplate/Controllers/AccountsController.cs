@@ -1,6 +1,5 @@
 ﻿using CryptoHelper;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
@@ -105,7 +104,24 @@ namespace WebAPITemplate.Controllers
                     RoleId = roles.First(r => r.Name == SystemRoles.Client.ToString()).Id,
                     UserId = newUser.Id
                 });
+
+                var emailToken = Guid.NewGuid().ToString();
+
+                _unitOfWork.UserTokensRepository.Insert(new UserTokens
+                {
+                    LoginProvider = Globals.EmailLoginProvider,
+                    Name = Globals.EmailTokenName,
+                    UserId = newUser.Id,
+                    Value = emailToken
+                });
+
                 await _unitOfWork.SaveAsync();
+
+                var tokenVerificationUrl = HttpUtility.UrlDecode(request.ConfirmationUrl)
+                    .Replace("#Id", newUser.Id)
+                    .Replace("#Token", emailToken);
+                await _emailService.SendEmailAsync(request.Email, _localizer["EmailVerificationSubject"].Value,
+                    string.Format(_localizer["EmailVerificationMessage"].Value, tokenVerificationUrl));
             }
             catch (SqlException)
             {
@@ -115,12 +131,6 @@ namespace WebAPITemplate.Controllers
             {
                 return BadRequest(_localizer["InvalidUserCreation"].Value);
             }
-
-            var tokenVerificationUrl = HttpUtility.UrlDecode(request.ConfirmationUrl)
-                .Replace("#Id", newUser.Id)
-                .Replace("#Token", UserManager<Users>.ConfirmEmailTokenPurpose);
-            await _emailService.SendEmailAsync(request.Email, _localizer["EmailVerificationSubject"].Value,
-                string.Format(_localizer["EmailVerificationMessage"].Value, tokenVerificationUrl));
 
             return Ok(string.Format(_localizer["RegistrationConfirmationMessage"].Value, request.Email));
         }
@@ -141,12 +151,45 @@ namespace WebAPITemplate.Controllers
                 return BadRequest(_localizer["MissingHiddenDataMessage"].Value);
             }
 
-            var tokenVerificationUrl = HttpUtility.UrlDecode(request.ConfirmationUrl)
-                .Replace("#Id", user.Id)
-                .Replace("#Token", UserManager<Users>.ResetPasswordTokenPurpose);
+            try
+            {
+                var userTokens = _unitOfWork.UserTokensRepository.Get(ut => ut.UserId == user.Id && ut.Name == Globals.ResetPasswordTokenName);
+                string resetToken;
 
-            await _emailService.SendEmailAsync(request.Email, _localizer["ForgotPasswordSubject"].Value,
-                string.Format(_localizer["ForgotPasswordMessage"].Value, tokenVerificationUrl));
+                if (userTokens == null)
+                {
+                    resetToken = Guid.NewGuid().ToString();
+
+                    _unitOfWork.UserTokensRepository.Insert(new UserTokens
+                    {
+                        LoginProvider = Globals.ResetPasswordLoginProvider,
+                        Name = Globals.ResetPasswordTokenName,
+                        UserId = user.Id,
+                        Value = resetToken
+                    });
+
+                    await _unitOfWork.SaveAsync();
+                }
+                else
+                {
+                    resetToken = userTokens.First().Value;
+                }
+
+                var tokenVerificationUrl = HttpUtility.UrlDecode(request.ConfirmationUrl)
+                    .Replace("#Id", user.Id)
+                    .Replace("#Token", resetToken);
+
+                await _emailService.SendEmailAsync(request.Email, _localizer["ForgotPasswordSubject"].Value,
+                    string.Format(_localizer["ForgotPasswordMessage"].Value, tokenVerificationUrl));
+            }
+            catch (SqlException)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, _localizer["DatabaseConnectionException"].Value);
+            }
+            catch (Exception)
+            {
+                return BadRequest(_localizer["InvalidPasswordReset"].Value);
+            }
 
             return Ok(_localizer["ForgotPasswordCheckEmailMessage"].Value);
         }
@@ -156,13 +199,19 @@ namespace WebAPITemplate.Controllers
         [Route("reset")]
         public async Task<IActionResult> ResetPassword(ResetPasswordRequest request)
         {
-            var user = _unitOfWork.UsersRepository.GetByID(request.Id);
-            if (user == null)
+            var users = _unitOfWork.UsersRepository.Get(u => u.Id == request.Id, includeProperties: u => u.UserTokens);
+            Users currentUser;
+
+            if (users == null || users.Count() == 0)
             {
                 throw new InvalidOperationException();
             }
+            else
+            {
+                currentUser = users.First();
+            }
 
-            if (request.Token != UserManager<Users>.ResetPasswordTokenPurpose)
+            if (!currentUser.UserTokens.Any(ut => ut.Name == request.Token))
             {
                 return BadRequest(_localizer["MissingHiddenDataMessage"].Value);
             }
@@ -172,7 +221,7 @@ namespace WebAPITemplate.Controllers
                 return BadRequest(_localizer["InvalidPasswordsMatch"].Value);
             }
 
-            var resetPasswordResult = _unitOfWork.UsersRepository.ResetPassword(user, request.Password);
+            var resetPasswordResult = _unitOfWork.UsersRepository.ResetPassword(currentUser, request.Password);
             if (!resetPasswordResult)
             {
                 return BadRequest(_localizer["InvalidPasswordReset"].Value);
@@ -180,7 +229,7 @@ namespace WebAPITemplate.Controllers
 
             try
             {
-                _unitOfWork.UsersRepository.Update(user);
+                _unitOfWork.UsersRepository.Update(currentUser);
                 await _unitOfWork.SaveAsync();
             }
             catch (SqlException)
@@ -261,26 +310,32 @@ namespace WebAPITemplate.Controllers
         [Route("confirm/email")]
         public IActionResult ConfirmEmail(string id, string token)
         {
-            var user = _unitOfWork.UsersRepository.GetByID(id);
-            if (user == null)
+            var users = _unitOfWork.UsersRepository.Get(u => u.Id == id, includeProperties: u => u.UserTokens);
+            Users currentUser;
+
+            if (users == null)
             {
                 return BadRequest(_localizer["InvalidLoginCredentials"].Value);
             }
+            else
+            {
+                currentUser = users.First();
+            }
 
-            if (UserManager<Users>.ConfirmEmailTokenPurpose != token)
+            if (!currentUser.UserTokens.Any(ut => ut.Name == token))
             {
                 return BadRequest(_localizer["MissingHiddenDataMessage"].Value);
             }
 
-            if (user.EmailConfirmed)
+            if (currentUser.EmailConfirmed)
             {
                 return Ok();
             }
 
             try
             {
-                user.EmailConfirmed = true;
-                _unitOfWork.UsersRepository.Update(user);
+                currentUser.EmailConfirmed = true;
+                _unitOfWork.UsersRepository.Update(currentUser);
                 _unitOfWork.Save();
             }
             catch (SqlException)
