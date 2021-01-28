@@ -10,8 +10,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using WebAPITemplate.Database;
@@ -70,7 +72,7 @@ namespace WebAPITemplate
                     OnTokenValidated = context =>
                     {
                         var unitOfWork = context.HttpContext.RequestServices.GetRequiredService<IUnitOfWork>();
-                        var userId = context.Principal.Identity.Name;
+                        var userId = context.Principal.Claims.FirstOrDefault().Value;
                         var user = unitOfWork.UsersRepository.GetByID(userId);
                         if (user == null)
                         {
@@ -84,7 +86,8 @@ namespace WebAPITemplate
                 jwtBearerOptions.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Globals.TokenSecret)),
+                    //IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Globals.TokenSecret)),
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(Globals.TokenSecret)),
                     ValidateIssuer = true,
                     ValidIssuer = Globals.TokenIssuer,
                     ValidateAudience = true,

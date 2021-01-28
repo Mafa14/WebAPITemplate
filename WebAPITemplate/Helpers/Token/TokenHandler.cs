@@ -41,7 +41,8 @@ namespace WebAPITemplate.Helpers.Token
                     }
                 }
 
-                var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Globals.TokenSecret));
+                //var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Globals.TokenSecret));
+                var secretKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(Globals.TokenSecret));
                 var claims = new Claim[] {
                     new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                     new Claim(JwtRegisteredClaimNames.Email, user.Email)
@@ -99,7 +100,8 @@ namespace WebAPITemplate.Helpers.Token
             return new TokenValidationParameters()
             {
                 ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Globals.TokenSecret)),
+                //IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Globals.TokenSecret)),
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(Globals.TokenSecret)),
                 ValidateIssuer = true,
                 ValidIssuer = Globals.TokenIssuer,
                 ValidateAudience = true,
